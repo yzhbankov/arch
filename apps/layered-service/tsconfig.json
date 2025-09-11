@@ -1,0 +1,15 @@
+{
+    "extends": "../../tsconfig.base.json",
+    "compilerOptions": {
+        "outDir": "./dist" /* Specify an output folder for all emitted files. */,
+        "paths": {
+            "@shared/logger": ["./shared/logger"],
+            "@shared/repository": ["./shared/repository"],
+            "@shared/migrations": ["./shared/migrations"],
+            "@utils": ["./apps/message-processor/lib/utils"],
+            "@models": ["./apps/message-processor/lib/models"],
+            "@usecases": ["./apps/message-processor/lib/usecases"],
+            "@logger": ["./apps/message-processor/lib/api/logger"]
+        }
+    }
+}

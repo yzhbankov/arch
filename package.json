@@ -1,0 +1,40 @@
+{
+  "name": "arch",
+  "version": "1.0.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22.0.0",
+    "npm": ">=10.9.2"
+  },
+  "scripts": {
+    "lint": "lerna run lint",
+    "lint:fix": "lerna run lint:fix",
+    "start:layered": "cd apps/layered-service && yarn start",
+    "clean": "lerna run clean && rimraf node_modules",
+    "reset": "yarn run clean && yarn install"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yzhbankov/arch.git"
+  },
+  "workspaces": [
+    "apps/layered-service"
+  ],
+  "private": true,
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "babel-eslint": "^10.1.0",
+    "eslint": "^9.22.0",
+    "eslint-config-prettier": "^10.1.1",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-mocha": "^10.5.0",
+    "lerna": "^8.2.1",
+    "prettier": "^3.5.3",
+    "rimraf": "^3.0.2",
+    "typescript": "^5.8.2",
+    "typescript-eslint": "^8.26.1"
+  },
+  "license": "UNLICENSED"
+}
