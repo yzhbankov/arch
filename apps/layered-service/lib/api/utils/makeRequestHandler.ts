@@ -27,7 +27,7 @@ export default function makeRequestHandler(
 
             const result = await runUseCase(UseCase, {params});
 
-            logRequest(params, result, startTime);
+            // logRequest(params, result, startTime);
         } catch (err: any) {
             console.error(err);
         }

@@ -1,16 +1,17 @@
 {
-    "name": "layered-service",
+    "name": "zmq",
     "version": "1.0.0",
     "description": "",
-    "main": "apps/layered-service/dist/app.js",
+    "main": "apps/zmq/dist/app.js",
     "engines": {
         "node": ">=22.0.0",
         "npm": ">=10.9.2"
     },
     "scripts": {
-        "start": "node dist/app.js",
-        "start:dev": "tsx app.ts",
-        "build": "cross-env NODE_ENV=production tsc && tsc-alias && copyfiles -u 1 config/*.json dist/config && cp .env* dist/",
+        "start": "node dist/apps/zmq/app.js",
+        "start:push": "node push.mjs",
+        "start:pull": "node pull.mjs",
+        "build": "cross-env NODE_ENV=production tsc && tsc-alias && copyfiles -u 1 config/*.json dist/apps/zmq/config && cp .env* dist/apps/zmq",
         "lint": "eslint . --ext .ts",
         "lint:fix": "eslint --fix './**/*.ts'",
         "reset": "yarn clean && yarn",
@@ -32,7 +33,6 @@
         "typescript-eslint": "^8.26.0"
     },
     "dependencies": {
-        "@redis/client": "^5.8.2",
         "cross-env": "^7.0.3",
         "dotenv": "^16.4.7",
         "dotenv-defaults": "^5.0.2",

@@ -1,8 +1,8 @@
 {
-    "name": "layered-service",
+    "name": "event-driven",
     "version": "1.0.0",
     "description": "",
-    "main": "apps/layered-service/dist/app.js",
+    "main": "apps/event-driven/dist/app.js",
     "engines": {
         "node": ">=22.0.0",
         "npm": ">=10.9.2"
@@ -36,6 +36,7 @@
         "cross-env": "^7.0.3",
         "dotenv": "^16.4.7",
         "dotenv-defaults": "^5.0.2",
+        "ioredis": "^5.7.0",
         "livr": "^2.8.1",
         "livr-extra-rules": "^1.4.0",
         "redis": "^4.7.0",

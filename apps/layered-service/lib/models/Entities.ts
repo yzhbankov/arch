@@ -20,4 +20,8 @@ export class Entities extends ModelBase implements IModelBase {
         }
         return entity;
     }
+
+    async send(message: Record<string, any>) {
+        await this.zmqPushClient?.send(JSON.stringify(message));
+    }
 }

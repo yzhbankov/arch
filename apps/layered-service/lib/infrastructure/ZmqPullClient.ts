@@ -21,7 +21,7 @@ export class ZmqPullClient extends EventEmitter implements IZmqPullClient {
         super();
         this.config = config;
         this.socket = new Pull();
-        this.socket.connect(config.address);
+        this.socket.bindSync(config.address);
         console.log(`ZMQ pull client connected to address: ${config.address}`);
     }
 

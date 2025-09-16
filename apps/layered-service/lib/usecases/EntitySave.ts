@@ -14,6 +14,7 @@ export class EntitySave extends UseCaseBase implements IUseCase {
         const entityModel = new Entities();
         const entity = await entityModel.findByKey(params.key);
         await entityModel.save(params.key, JSON.stringify(params));
+        await entityModel.send({...params, ts: new Date().toISOString()});
         return null;
     }
 }
