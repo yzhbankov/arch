@@ -37,8 +37,8 @@ const zeromq_1 = require("zeromq");
 exports.zmqPull = new zeromq_1.Pull();
 function initPull(address) {
     return __awaiter(this, void 0, void 0, function* () {
-        exports.zmqPull.bindSync(address);
-        console.log(`ZMQ Pull bind ${address}`);
+        exports.zmqPull.connect(address);
+        console.log(`ZMQ Pull connect ${address}`);
     });
 }
 function parseSafeNull(string) {

@@ -19,29 +19,34 @@ console.log(`Worker started with UID: ${WORKER_UID}`);
 const zmqPush = new zeromq_1.Push();
 zmqPush.connect("tcp://127.0.0.1:7000");
 console.log("Worker connected to push socket");
-let sendQueue = Promise.resolve(); // serialize sends
+let zmqSendQueue = Promise.resolve(); // serialize sends
 let messagesReceived = 0;
 (0, redisClient_1.initRedis)();
-worker_threads_1.parentPort === null || worker_threads_1.parentPort === void 0 ? void 0 : worker_threads_1.parentPort.on('message', (msg) => {
-    sendQueue = sendQueue.then(() => __awaiter(void 0, void 0, void 0, function* () {
-        try {
-            const processed = {
-                key: msg.key,
-                ts: new Date().toISOString(),
-                randomInt: msg.data.randomInt * 2,
-                workerUid: WORKER_UID, // add UID to processed message
-            };
-            yield (0, redisClient_1.findByKey)(processed.key);
-            yield (0, redisClient_1.saveToRedis)(processed.key, JSON.stringify(processed));
+worker_threads_1.parentPort === null || worker_threads_1.parentPort === void 0 ? void 0 : worker_threads_1.parentPort.on('message', (msg) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const processed = {
+            key: msg.key,
+            ts: new Date().toISOString(),
+            randomInt: msg.data.randomInt * 2,
+            workerUid: WORKER_UID, // add UID to processed message
+        };
+        yield (0, redisClient_1.findByKey)(processed.key);
+        yield (0, redisClient_1.saveToRedis)(processed.key, JSON.stringify(processed));
+        yield (0, redisClient_1.saveToRedis)(processed.key, JSON.stringify(processed));
+        yield (0, redisClient_1.saveToRedis)(processed.key, JSON.stringify(processed));
+        // Enqueue the ZMQ send operation to a separate promise chain
+        zmqSendQueue = zmqSendQueue.then(() => __awaiter(void 0, void 0, void 0, function* () {
             yield zmqPush.send(JSON.stringify(processed));
-            messagesReceived++;
-            worker_threads_1.parentPort === null || worker_threads_1.parentPort === void 0 ? void 0 : worker_threads_1.parentPort.postMessage({ ok: true });
-        }
-        catch (err) {
-            console.error(err);
-        }
-    }));
-});
+        }));
+        // Wait for the ZMQ send to complete before incrementing counter and sending back to parent
+        yield zmqSendQueue;
+        messagesReceived++;
+        worker_threads_1.parentPort === null || worker_threads_1.parentPort === void 0 ? void 0 : worker_threads_1.parentPort.postMessage({ ok: true });
+    }
+    catch (err) {
+        console.error(err);
+    }
+}));
 // Log messages received every 10 seconds
 setInterval(() => {
     console.log(`Worker ${WORKER_UID} processed ${messagesReceived}`);

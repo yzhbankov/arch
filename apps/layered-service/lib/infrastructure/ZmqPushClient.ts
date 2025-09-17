@@ -20,7 +20,7 @@ export class ZmqPushClient implements IZmqPushClient {
     constructor(config: ZmqConfigType) {
         this.config = config;
         this.client = new Push();
-        this.client.bindSync(config.address);
+        this.client.connect(config.address);
         console.log(`ZMQ push client bind ${config.address}`);
     }
 

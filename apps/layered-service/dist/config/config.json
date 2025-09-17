@@ -1,0 +1,13 @@
+{
+  "serverPort": "{{RTLS_ASSET_TRACKING_MP_PORT}}",
+  "db": {
+    "host": "{{RTLS_ASSET_TRACKING_DB_HOST}}",
+    "port": "{{RTLS_ASSET_TRACKING_DB_PORT}}",
+    "prefix": "{{RTLS_ASSET_TRACKING_DB_PREFIX}}"
+  },
+  "zmq": {
+    "pushAddress": "{{RTLS_ASSET_TRACKING_PUSH_ZMQ_ADDRESS}}",
+    "pullAddress": "{{RTLS_ASSET_TRACKING_PULL_ZMQ_ADDRESS}}",
+    "log": "{{RTLS_ASSET_TRACKING_LOG_ZMQ_MESSAGES}}"
+  }
+}

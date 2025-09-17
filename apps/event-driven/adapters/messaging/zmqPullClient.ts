@@ -2,8 +2,8 @@ import { Pull } from 'zeromq';
 export const zmqPull = new Pull();
 
 export async function initPull(address: string) {
-    zmqPull.bindSync(address);
-    console.log(`ZMQ Pull bind ${address}`);
+    zmqPull.connect(address);
+    console.log(`ZMQ Pull connect ${address}`);
 }
 
 function parseSafeNull(string: string | null): Record<string, any>|null {

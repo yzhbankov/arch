@@ -4,8 +4,8 @@ import { Push } from "zeromq";
 async function runPublisher() {
     const push = new Push();
     const address = "tcp://127.0.0.1:7001";
-    await push.connect(address);
-    console.log(`Push publisher connected to ${address}`);
+    await push.bind(address);
+    console.log(`Push publisher bind ${address}`);
 
     let counter = 0;
     let totalMessages = 0;
