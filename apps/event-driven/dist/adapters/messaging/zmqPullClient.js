@@ -38,28 +38,35 @@ exports.zmqPull = new zeromq_1.Pull();
 function initPull(address) {
     return __awaiter(this, void 0, void 0, function* () {
         exports.zmqPull.connect(address);
-        console.log(`ZMQ Pull connect ${address}`);
+        console.log(`ZMQ Pull connected to ${address}`);
     });
 }
 function parseSafeNull(string) {
-    let result = null;
-    if (string === null || string === undefined) {
+    if (string === null || string === undefined)
         return string;
-    }
     try {
-        result = JSON.parse(string);
+        return JSON.parse(string);
     }
     catch (e) {
         console.error(`Error parsing "${string}"`, e);
+        return null;
     }
-    return result;
 }
 function getChannelWithMessage(rawMessage) {
-    const index = rawMessage.indexOf('{');
-    // const channel = rawMessage.substring(0, index).trimEnd().trimStart() || '';
-    return parseSafeNull(rawMessage.substring(index));
+    if (Array.isArray(rawMessage)) {
+        return rawMessage.map((m) => {
+            const index = m.indexOf("{");
+            return parseSafeNull(m.substring(index));
+        });
+    }
+    else {
+        const index = rawMessage.indexOf("{");
+        return [parseSafeNull(rawMessage.substring(index))];
+    }
 }
-// Async iterator for messages
+/**
+ * Async iterator for incoming messages (yields batches).
+ */
 function messages() {
     return __asyncGenerator(this, arguments, function* messages_1() {
         var _a, e_1, _b, _c;
@@ -67,8 +74,11 @@ function messages() {
             for (var _d = true, zmqPull_1 = __asyncValues(exports.zmqPull), zmqPull_1_1; zmqPull_1_1 = yield __await(zmqPull_1.next()), _a = zmqPull_1_1.done, !_a; _d = true) {
                 _c = zmqPull_1_1.value;
                 _d = false;
-                const [msg] = _c;
-                yield yield __await(getChannelWithMessage(msg.toString()));
+                const msgParts = _c;
+                // msgParts is an array of buffers (multipart batch)
+                const strings = msgParts.map((b) => b.toString());
+                const parsedBatch = getChannelWithMessage(strings); // returns array of messages
+                yield yield __await(parsedBatch); // yield the entire batch
             }
         }
         catch (e_1_1) { e_1 = { error: e_1_1 }; }

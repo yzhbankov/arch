@@ -22,8 +22,8 @@ console.log("Worker connected to push socket");
 let zmqSendQueue = Promise.resolve(); // serialize sends
 let messagesReceived = 0;
 (0, redisClient_1.initRedis)();
-worker_threads_1.parentPort === null || worker_threads_1.parentPort === void 0 ? void 0 : worker_threads_1.parentPort.on('message', (msg) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
+function handleMsg(msg) {
+    return __awaiter(this, void 0, void 0, function* () {
         const processed = {
             key: msg.key,
             ts: new Date().toISOString(),
@@ -32,15 +32,23 @@ worker_threads_1.parentPort === null || worker_threads_1.parentPort === void 0 ?
         };
         yield (0, redisClient_1.findByKey)(processed.key);
         yield (0, redisClient_1.saveToRedis)(processed.key, JSON.stringify(processed));
-        yield (0, redisClient_1.saveToRedis)(processed.key, JSON.stringify(processed));
-        yield (0, redisClient_1.saveToRedis)(processed.key, JSON.stringify(processed));
+        return processed;
+    });
+}
+worker_threads_1.parentPort === null || worker_threads_1.parentPort === void 0 ? void 0 : worker_threads_1.parentPort.on('message', (msgList) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const result = [];
+        for (const message of msgList) {
+            const parsedMsg = yield handleMsg(message);
+            result.push(parsedMsg);
+        }
         // Enqueue the ZMQ send operation to a separate promise chain
         zmqSendQueue = zmqSendQueue.then(() => __awaiter(void 0, void 0, void 0, function* () {
-            yield zmqPush.send(JSON.stringify(processed));
+            yield zmqPush.send(result.map((item) => JSON.stringify(item)));
         }));
         // Wait for the ZMQ send to complete before incrementing counter and sending back to parent
         yield zmqSendQueue;
-        messagesReceived++;
+        messagesReceived += result.length;
         worker_threads_1.parentPort === null || worker_threads_1.parentPort === void 0 ? void 0 : worker_threads_1.parentPort.postMessage({ ok: true });
     }
     catch (err) {

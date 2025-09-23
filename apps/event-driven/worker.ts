@@ -16,29 +16,38 @@ let messagesReceived = 0;
 
 initRedis();
 
-parentPort?.on('message', async (msg) => {
-    try {
-        const processed = {
-            key: msg.key,
-            ts: new Date().toISOString(),
-            randomInt: msg.data.randomInt * 2,
-            workerUid: WORKER_UID, // add UID to processed message
-        };
+async function handleMsg(msg: Record<string, any>) {
+    const processed = {
+        key: msg.key,
+        ts: new Date().toISOString(),
+        randomInt: msg.data.randomInt * 2,
+        workerUid: WORKER_UID, // add UID to processed message
+    };
 
-        await findByKey(processed.key);
-        await saveToRedis(processed.key, JSON.stringify(processed));
-        await saveToRedis(processed.key, JSON.stringify(processed));
-        await saveToRedis(processed.key, JSON.stringify(processed));
+    await findByKey(processed.key);
+    await saveToRedis(processed.key, JSON.stringify(processed));
+
+    return processed;
+}
+
+parentPort?.on('message', async (msgList: Record<string, any>[]) => {
+    try {
+        const result: Record<string, any> = [];
+
+        for (const message of msgList) {
+            const parsedMsg = await handleMsg(message);
+            result.push(parsedMsg);
+        }
 
         // Enqueue the ZMQ send operation to a separate promise chain
         zmqSendQueue = zmqSendQueue.then(async () => {
-            await zmqPush.send(JSON.stringify(processed));
+            await zmqPush.send(result.map((item: Record<string, any>) => JSON.stringify(item)));
         });
 
         // Wait for the ZMQ send to complete before incrementing counter and sending back to parent
         await zmqSendQueue;
 
-        messagesReceived++;
+        messagesReceived+=result.length;
 
         parentPort?.postMessage({ ok: true });
     } catch (err) {

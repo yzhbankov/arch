@@ -9,6 +9,7 @@ async function runPublisher() {
 
     let counter = 0;
     let totalMessages = 0;
+    const BATCH_SIZE = 5; // number of messages per batch
 
     // Log messages per 1 second
     setInterval(() => {
@@ -31,17 +32,23 @@ async function runPublisher() {
     process.on("SIGTERM", handleExit);
 
     while (true) {
-        const msg = {
-            key: `00000001A`,
-            ts: new Date().toISOString(),
-            data: {
-                randomInt: Math.floor(Math.random() * 100),
-            },
-        };
+        const batch = [];
 
-        await push.send("~entity" + JSON.stringify(msg));
-        counter++;
-        totalMessages++;
+        for (let i = 0; i < BATCH_SIZE; i++) {
+            const msg = {
+                key: `00000001A`,
+                ts: new Date().toISOString(),
+                data: {
+                    randomInt: Math.floor(Math.random() * 100),
+                },
+            };
+            batch.push(JSON.stringify(msg));
+        }
+
+        // Send batch as a single multipart message
+        await push.send(batch.map(m => `~entity${m}`));
+        counter += BATCH_SIZE;
+        totalMessages += BATCH_SIZE;
     }
 }
 

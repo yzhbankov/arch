@@ -1,33 +1,42 @@
-import { Pull } from 'zeromq';
+import { Pull } from "zeromq";
+
 export const zmqPull = new Pull();
 
 export async function initPull(address: string) {
     zmqPull.connect(address);
-    console.log(`ZMQ Pull connect ${address}`);
+    console.log(`ZMQ Pull connected to ${address}`);
 }
 
-function parseSafeNull(string: string | null): Record<string, any>|null {
-    let result = null;
-    if (string === null || string === undefined) {
-        return string;
-    }
+function parseSafeNull(string: string | null): Record<string, any> | null {
+    if (string === null || string === undefined) return string;
     try {
-        result = JSON.parse(string);
+        return JSON.parse(string);
     } catch (e) {
         console.error(`Error parsing "${string}"`, e);
+        return null;
     }
-    return result;
 }
 
-export function getChannelWithMessage(rawMessage: string) {
-    const index = rawMessage.indexOf('{');
-    // const channel = rawMessage.substring(0, index).trimEnd().trimStart() || '';
-    return parseSafeNull(rawMessage.substring(index));
+export function getChannelWithMessage(rawMessage: string | string[]): (Record<string, any> | null)[] {
+    if (Array.isArray(rawMessage)) {
+        return rawMessage.map((m) => {
+            const index = m.indexOf("{");
+            return parseSafeNull(m.substring(index));
+        });
+    } else {
+        const index = rawMessage.indexOf("{");
+        return [parseSafeNull(rawMessage.substring(index))];
+    }
 }
 
-// Async iterator for messages
+/**
+ * Async iterator for incoming messages (yields batches).
+ */
 export async function* messages() {
-    for await (const [msg] of zmqPull) {
-        yield getChannelWithMessage(msg.toString());
+    for await (const msgParts of zmqPull) {
+        // msgParts is an array of buffers (multipart batch)
+        const strings = msgParts.map((b) => b.toString());
+        const parsedBatch = getChannelWithMessage(strings); // returns array of messages
+        yield parsedBatch; // yield the entire batch
     }
 }
