@@ -1,15 +1,28 @@
-import {Pull} from 'zeromq';
-import EventEmitter from 'events';
+import { Pull } from 'zeromq';
 
 
-export class ZmqPullClient extends EventEmitter {
+export class ZmqPullClient {
     socket = null;
+    #bound = false;
 
     constructor(config) {
-        super();
         this.config = config;
         this.socket = new Pull();
-        this.socket.bindSync(config.address);
-        console.log(`ZMQ pull client connected to ${config.address}`);
+    }
+
+    async start() {
+        if (!this.#bound) {
+            await this.socket.bind(this.config.address);
+            this.#bound = true;
+            console.log(`ZMQ pull client bound to ${this.config.address}`);
+        }
+    }
+
+    async destroy() {
+        if (this.socket && this.#bound) {
+            await this.socket.close();
+            this.#bound = false;
+            console.log('ZMQ pull client socket closed');
+        }
     }
 }

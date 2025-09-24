@@ -1,46 +1,51 @@
 import { Push } from "zeromq";
 
+const ADDRESS = "tcp://127.0.0.1:7001";
+
+function logStats(counter, totalMessages) {
+    console.log(`Messages sent in last 1s: ${counter.value}`);
+    console.log(`Total messages sent: ${totalMessages.value}`);
+    counter.value = 0;
+}
+
+function createMessage() {
+    return JSON.stringify({
+        key: `00000001A`,
+        ts: new Date().toISOString(),
+        data: {
+            randomInt: Math.floor(Math.random() * 100),
+        },
+    });
+}
+
+async function handleExit(push, totalMessages) {
+    console.log(`\nProcess exiting. Total messages sent: ${totalMessages.value}`);
+    try {
+        await push.close();
+    } catch (err) {
+        console.error("Error closing Push socket:", err);
+    }
+    process.exit(0);
+}
+
 async function runPublisher() {
     const push = new Push();
-    const address = "tcp://127.0.0.1:7001";
-    push.connect(address);
-    console.log(`Push publisher bind ${address}`);
+    await push.connect(ADDRESS);
+    console.log(`Push publisher bind ${ADDRESS}`);
 
-    let counter = 0;
-    let totalMessages = 0;
+    const counter = { value: 0 };
+    const totalMessages = { value: 0 };
 
-    // Log messages per 1 second
-    setInterval(() => {
-        console.log(`Messages sent in last 1s: ${counter}`);
-        console.log(`Total messages sent: ${totalMessages}`);
-        counter = 0;
-    }, 1000);
+    setInterval(() => logStats(counter, totalMessages), 1000);
 
-    // Handle process termination
-    const handleExit = async () => {
-        console.log(`\nProcess exiting. Total messages sent: ${totalMessages}`);
-        try {
-            await push.close();
-        } catch (err) {
-            console.error("Error closing Push socket:", err);
-        }
-        process.exit(0);
-    };
-    process.on("SIGINT", handleExit);
-    process.on("SIGTERM", handleExit);
+    const exitHandler = () => handleExit(push, totalMessages);
+    process.on("SIGINT", exitHandler);
+    process.on("SIGTERM", exitHandler);
 
-    while (true) {
-        const msg = {
-            key: `00000001A`,
-            ts: new Date().toISOString(),
-            data: {
-                randomInt: Math.floor(Math.random() * 100),
-            },
-        };
-
-        await push.send(JSON.stringify(msg));
-        counter += 1;
-        totalMessages += 1;
+    while (totalMessages.value < 1000000) {
+        await push.send(createMessage());
+        counter.value += 1;
+        totalMessages.value += 1;
     }
 }
 
