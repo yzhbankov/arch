@@ -1,9 +1,9 @@
 export default async function handleMessage(message, client) {
     const redisKey = `test:${message.key}`;
     try {
-        // await client.hGetAll(redisKey);
-        // await client.del(redisKey);
-        // await client.hSet(redisKey, ['field1', JSON.stringify(message)]);
+        await client.hGetAll(redisKey);
+        await client.del(redisKey);
+        await client.hSet(redisKey, ['field1', JSON.stringify(message)]);
     } catch (err) {
         console.error('Redis operation failed:', err);
         return;

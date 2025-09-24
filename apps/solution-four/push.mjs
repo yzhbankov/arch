@@ -35,7 +35,7 @@ async function runPublisher() {
 
     const counter = { value: 0 };
     const totalMessages = { value: 0 };
-    const BATCH_SIZE = 5;
+    const BATCH_SIZE = 200;
 
     setInterval(() => logStats(counter, totalMessages), 1000);
 
@@ -43,7 +43,7 @@ async function runPublisher() {
     process.on("SIGINT", exitHandler);
     process.on("SIGTERM", exitHandler);
 
-    let messagesLeft = 0000000;
+    let messagesLeft = 20000000;
     while (messagesLeft > 0) {
         const batch = [];
         const currentBatchSize = Math.min(BATCH_SIZE, messagesLeft);
