@@ -30,8 +30,8 @@ function handleMsg(msg) {
             randomInt: msg.data.randomInt * 2,
             workerUid: WORKER_UID, // add UID to processed message
         };
-        yield (0, redisClient_1.findByKey)(processed.key);
-        yield (0, redisClient_1.saveToRedis)(processed.key, JSON.stringify(processed));
+        // await findByKey(processed.key);
+        // await saveToRedis(processed.key, JSON.stringify(processed));
         return processed;
     });
 }

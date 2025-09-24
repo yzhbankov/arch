@@ -1,0 +1,18 @@
+{
+    "name": "zmq",
+    "version": "1.0.0",
+    "description": "",
+    "engines": {
+        "node": ">=22.0.0",
+        "npm": ">=10.9.2"
+    },
+    "scripts": {
+        "start:push": "node push.mjs",
+        "start:pull": "node pull.mjs",
+        "start:mp": "node ./message-processor/app.mjs"
+    },
+    "license": "UNLICENSED",
+    "dependencies": {
+        "zeromq": "^6.3.0"
+    }
+}
