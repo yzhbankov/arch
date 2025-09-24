@@ -42,7 +42,7 @@ async function runPublisher() {
     process.on("SIGINT", exitHandler);
     process.on("SIGTERM", exitHandler);
 
-    while (totalMessages.value < 400000) {
+    while (totalMessages.value < 2000000) {
         await push.send(createMessage());
         counter.value += 1;
         totalMessages.value += 1;
